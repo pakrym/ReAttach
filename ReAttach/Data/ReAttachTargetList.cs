@@ -66,12 +66,7 @@ namespace ReAttach.Data
 			}
 			_targets.Add(target);
 		}
-
-		public ReAttachTarget Find(int pid)
-		{
-			return _targets.Find(p => p.ProcessId == pid);
-		}
-
+        
 		public ReAttachTarget Find(string path, string user, string serverName)
 		{
 			return _targets.Find(p =>

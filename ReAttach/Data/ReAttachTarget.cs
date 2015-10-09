@@ -5,10 +5,10 @@ using System.IO;
 namespace ReAttach.Data
 {
 	public class ReAttachTarget
-	{
-		public int ProcessId { get; set; }
-		public string ProcessName { get; set; }
-		public string ProcessPath { get; set; }
+    {
+        public int ProcessID { get; set; }
+        public string ProcessName { get; set; }
+        public string ProcessPath { get; set; }
 		public string ProcessUser { get; set; }
 		public string ServerName { get; set; }
 		public bool IsAttached { get; set; }
@@ -25,7 +25,6 @@ namespace ReAttach.Data
 			{
 				ProcessName = path;
 			}
-			ProcessId = pid;
 			ProcessPath = path;
 			ProcessUser = user ?? "";
 			ServerName = serverName ?? "";

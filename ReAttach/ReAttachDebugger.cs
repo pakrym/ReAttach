@@ -89,10 +89,7 @@ namespace ReAttach
 		{
 			var process = (IDebugProcess3)debugProcess;
 			var pid = process.GetProcessId();
-			var target = _package.History.Items.Find(pid);
-			if (target != null)
-				return target;
-
+			ReAttachTarget target;
 			var serverName = "";
 			IDebugCoreServer2 server;
 			if (debugProcess.GetServer(out server) == VSConstants.S_OK)
@@ -108,7 +105,7 @@ namespace ReAttach
 
 			var user = GetProcessUsername(pid);
 			var path = process.GetFilename();
-			target = new ReAttachTarget(pid, path, user, serverName);
+			target = _package.History.Items.Find(path, user, serverName) ?? new ReAttachTarget(pid, path, user, serverName);
 
 			var rawEngines = new GUID_ARRAY[1];
 
@@ -155,14 +152,13 @@ namespace ReAttach
 				return false;
 
 			Process3 process = null; // First try to use the pid.
-			if (target.ProcessId > 0)
-				process = candidates.FirstOrDefault(p => p.ProcessID == target.ProcessId);
-
 			// If we don't have an exact match, just go for the highest PID matching.
 			if (process == null)
 			{
-				var maxPid = candidates.Max(p => p.ProcessID);
-				process = candidates.FirstOrDefault(p => p.ProcessID == maxPid);
+                process =
+			        candidates.Select(p => new { VsProcess = p, Process = System.Diagnostics.Process.GetProcessById(p.ProcessID)})
+			            .OrderByDescending(p => p.Process.StartTime)
+			            .FirstOrDefault()?.VsProcess;
 			}
 
 			if (process == null)
@@ -197,8 +193,8 @@ namespace ReAttach
 		}
 
 		private string GetProcessUsername(int pid)
-		{
-			var process = _dteDebugger.LocalProcesses.OfType<Process3>().FirstOrDefault(p => p.ProcessID == pid);
+        {
+            var process = _dteDebugger.LocalProcesses.OfType<Process3>().FirstOrDefault(p => p.ProcessID == pid);
 			var result = process != null ? process.UserName : string.Empty;
 
 			return result;
